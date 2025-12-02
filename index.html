@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GREEN-API Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+        label, input, button, textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        textarea {
+            height: 200px;
+            resize: none;
+        }
+        input {
+            padding: 8px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>GREEN-API интерфейс</h1>
+
+    <label for="idInstance">idInstance:</label>
+    <input type="text" id="idInstance" placeholder="Введите idInstance" />
+
+    <label for="apiToken">ApiTokenInstance:</label>
+    <input type="text" id="apiToken" placeholder="Введите ApiTokenInstance" />
+
+    <button id="btnGetSettings">getSettings</button>
+    <button id="btnGetStateInstance">getStateInstance</button>
+    <button id="btnSendMessage">sendMessage</button>
+    <button id="btnSendFileByUrl">sendFileByUrl</button>
+
+    <label for="responseOutput">Ответ:</label>
+    <textarea id="responseOutput" readonly></textarea>
+
+    <script>
+        const responseOutput = document.getElementById('responseOutput');
+
+        function getApiData() {
+            const idInstance = document.getElementById('idInstance').value.trim();
+            const apiToken = document.getElementById('apiToken').value.trim();
+            if (!idInstance || !apiToken) {
+                alert('Пожалуйста, введите idInstance и ApiTokenInstance');
+                return null;
+            }
+            return { idInstance, apiToken };
+        }
+
+        async function callGreenApi(method, body = null) {
+            const auth = getApiData();
+            if (!auth) return;
+            const url = `https://api.green-api.com/waInstance${auth.idInstance}/${method}/${auth.apiToken}`;
+            try {
+                const options = body 
+                    ? {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(body)
+                      }
+                    : { method: 'GET' };
+                const response = await fetch(url, options);
+                const data = await response.json();
+                responseOutput.value = JSON.stringify(data, null, 4);
+            } catch (error) {
+                responseOutput.value = 'Ошибка: ' + error.message;
+            }
+        }
+
+        document.getElementById('btnGetSettings').addEventListener('click', () => {
+            callGreenApi('getSettings');
+        });
+
+        document.getElementById('btnGetStateInstance').addEventListener('click', () => {
+            callGreenApi('getStateInstance');
+        });
+
+        document.getElementById('btnSendMessage').addEventListener('click', async () => {
+            // Запросить у пользователя номер и сообщение через prompt
+            const auth = getApiData();
+            if (!auth) return;
+            const chatId = prompt('Введите chatId (например, номер телефона с кодом, например 79161234567@c.us):');
+            const message = prompt('Введите текст сообщения:');
+            if (!chatId || !message) {
+                alert('chatId и сообщение обязательны.');
+                return;
+            }
+            const body = {
+                chatId: chatId,
+                message: message
+            };
+            await callGreenApi('sendMessage', body);
+        });
+
+        document.getElementById('btnSendFileByUrl').addEventListener('click', async () => {
+            const auth = getApiData();
+            if (!auth) return;
+            const chatId = prompt('Введите chatId (например, 79161234567@c.us):');
+            const urlFile = prompt('Введите URL файла (например, изображение, документ):');
+            if (!chatId || !urlFile) {
+                alert('chatId и URL файла обязательны.');
+                return;
+            }
+            const body = {
+                chatId: chatId,
+                url: urlFile,
+                fileName: 'file'
+            };
+            await callGreenApi('sendFileByUrl', body);
+        });
+    </script>
+</body>
+</html>
+
