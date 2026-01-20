@@ -5,51 +5,197 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GREEN-API Interface</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 10px;
+        * {
+            box-sizing: border-box;
         }
-        label, input, button, textarea {
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #25D366;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #25D366;
+        }
+        
+        label {
             display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        textarea {
             width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #25D366;
+            box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.1);
+        }
+        
+        .buttons-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #25D366;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #20BA5A;
+        }
+        
+        button:active {
+            background-color: #1A9D4A;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .method-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .method-section.hidden {
+            display: none;
+        }
+        
+        .method-section label {
+            font-size: 13px;
+        }
+        
+        .method-section input {
             margin-bottom: 10px;
         }
-        textarea {
-            height: 200px;
-            resize: none;
+        
+        textarea#responseOutput {
+            height: 300px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
         }
-        input {
-            padding: 8px;
-            font-size: 1em;
+        
+        .response-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
         }
-        button {
-            padding: 10px;
-            font-size: 1em;
-            cursor: pointer;
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <h1>GREEN-API интерфейс</h1>
-
-    <label for="idInstance">idInstance:</label>
-    <input type="text" id="idInstance" placeholder="Введите idInstance" />
-
-    <label for="apiToken">ApiTokenInstance:</label>
-    <input type="text" id="apiToken" placeholder="Введите ApiTokenInstance" />
-
-    <button id="btnGetSettings">getSettings</button>
-    <button id="btnGetStateInstance">getStateInstance</button>
-    <button id="btnSendMessage">sendMessage</button>
-    <button id="btnSendFileByUrl">sendFileByUrl</button>
-
-    <label for="responseOutput">Ответ:</label>
-    <textarea id="responseOutput" readonly></textarea>
+    <div class="container">
+        <h1>GREEN-API Интерфейс</h1>
+        
+        <div class="section">
+            <div class="section-title">Параметры подключения</div>
+            <label for="idInstance">idInstance:</label>
+            <input type="text" id="idInstance" placeholder="Введите idInstance" />
+            
+            <label for="apiToken">ApiTokenInstance:</label>
+            <input type="text" id="apiToken" placeholder="Введите ApiTokenInstance" />
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Методы API</div>
+            
+            <div class="buttons-group">
+                <button id="btnGetSettings">getSettings</button>
+                <button id="btnGetStateInstance">getStateInstance</button>
+            </div>
+            
+            <div class="method-section" id="sendMessageSection">
+                <label for="chatId">ChatId (для sendMessage):</label>
+                <input type="text" id="chatId" placeholder="Например: 79161234567@c.us" />
+                
+                <label for="message">Сообщение:</label>
+                <textarea id="message" rows="3" placeholder="Введите текст сообщения"></textarea>
+                
+                <button id="btnSendMessage">sendMessage</button>
+            </div>
+            
+            <div class="method-section" id="sendFileByUrlSection">
+                <label for="chatIdFile">ChatId (для sendFileByUrl):</label>
+                <input type="text" id="chatIdFile" placeholder="Например: 79161234567@c.us" />
+                
+                <label for="urlFile">URL файла:</label>
+                <input type="text" id="urlFile" placeholder="https://example.com/file.jpg" />
+                
+                <label for="fileName">Имя файла:</label>
+                <input type="text" id="fileName" placeholder="file.jpg" />
+                
+                <button id="btnSendFileByUrl">sendFileByUrl</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="response-label">Ответ:</div>
+            <textarea id="responseOutput" readonly placeholder="Результаты вызовов методов будут отображаться здесь..."></textarea>
+        </div>
+    </div>
 
     <script>
         const responseOutput = document.getElementById('responseOutput');
+        const sendMessageSection = document.getElementById('sendMessageSection');
+        const sendFileByUrlSection = document.getElementById('sendFileByUrlSection');
 
         function getApiData() {
             const idInstance = document.getElementById('idInstance').value.trim();
@@ -61,11 +207,23 @@
             return { idInstance, apiToken };
         }
 
+        function showResponse(data) {
+            if (typeof data === 'object') {
+                responseOutput.value = JSON.stringify(data, null, 2);
+            } else {
+                responseOutput.value = data;
+            }
+        }
+
         async function callGreenApi(method, body = null) {
             const auth = getApiData();
             if (!auth) return;
+            
             const url = `https://api.green-api.com/waInstance${auth.idInstance}/${method}/${auth.apiToken}`;
+            
             try {
+                responseOutput.value = 'Загрузка...';
+                
                 const options = body 
                     ? {
                         method: 'POST',
@@ -73,56 +231,69 @@
                         body: JSON.stringify(body)
                       }
                     : { method: 'GET' };
+                
                 const response = await fetch(url, options);
                 const data = await response.json();
-                responseOutput.value = JSON.stringify(data, null, 4);
+                
+                showResponse(data);
             } catch (error) {
-                responseOutput.value = 'Ошибка: ' + error.message;
+                showResponse({ error: error.message, message: 'Ошибка при выполнении запроса' });
             }
         }
 
+        // getSettings
         document.getElementById('btnGetSettings').addEventListener('click', () => {
             callGreenApi('getSettings');
         });
 
+        // getStateInstance
         document.getElementById('btnGetStateInstance').addEventListener('click', () => {
             callGreenApi('getStateInstance');
         });
 
+        // sendMessage
         document.getElementById('btnSendMessage').addEventListener('click', async () => {
-            // Запросить у пользователя номер и сообщение через prompt
             const auth = getApiData();
             if (!auth) return;
-            const chatId = prompt('Введите chatId (например, номер телефона с кодом, например 79161234567@c.us):');
-            const message = prompt('Введите текст сообщения:');
+            
+            const chatId = document.getElementById('chatId').value.trim();
+            const message = document.getElementById('message').value.trim();
+            
             if (!chatId || !message) {
-                alert('chatId и сообщение обязательны.');
+                alert('Пожалуйста, введите ChatId и сообщение');
                 return;
             }
+            
             const body = {
                 chatId: chatId,
                 message: message
             };
+            
             await callGreenApi('sendMessage', body);
         });
 
+        // sendFileByUrl
         document.getElementById('btnSendFileByUrl').addEventListener('click', async () => {
             const auth = getApiData();
             if (!auth) return;
-            const chatId = prompt('Введите chatId (например, 79161234567@c.us):');
-            const urlFile = prompt('Введите URL файла (например, изображение, документ):');
-            if (!chatId || !urlFile) {
-                alert('chatId и URL файла обязательны.');
+            
+            const chatId = document.getElementById('chatIdFile').value.trim();
+            const urlFile = document.getElementById('urlFile').value.trim();
+            const fileName = document.getElementById('fileName').value.trim();
+            
+            if (!chatId || !urlFile || !fileName) {
+                alert('Пожалуйста, введите ChatId, URL файла и имя файла');
                 return;
             }
+            
             const body = {
                 chatId: chatId,
-                url: urlFile,
-                fileName: 'file'
+                urlFile: urlFile,
+                fileName: fileName
             };
+            
             await callGreenApi('sendFileByUrl', body);
         });
     </script>
 </body>
 </html>
-
